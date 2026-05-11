@@ -157,7 +157,7 @@ class StatusCommand(BotCommand):
             "",
             "---",
             "",
-            "**📈 自选股配置**",
+            "**📈 持仓股配置**",
             f"• 股票数量: {status['stock_count']} 只",
         ]
         

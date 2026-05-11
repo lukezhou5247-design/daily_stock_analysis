@@ -321,7 +321,7 @@ jobs:
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
 
           # ==========================================
-          # 自选股配置
+          # 持仓股配置
           # ==========================================
           STOCK_LIST: ${{ vars.STOCK_LIST || secrets.STOCK_LIST || '600519' }}
           MARKET_REVIEW_REGION: ${{ vars.MARKET_REVIEW_REGION || secrets.MARKET_REVIEW_REGION || 'cn' }}
@@ -363,11 +363,11 @@ jobs:
           MODE="${{ github.event.inputs.mode || 'full' }}"
           
           echo "=========================================="
-          echo "🚀 A股自选股智能分析系统"
+          echo "🚀 A股持仓股智能分析系统"
           echo "=========================================="
           echo "⏰ 时间: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')"
           echo "🎯 运行模式: $MODE"
-          echo "📊 自选股: $STOCK_LIST"
+          echo "📊 持仓股: $STOCK_LIST"
           echo "📝 报告类型: $REPORT_TYPE"
           echo ""
           echo "=========================================="

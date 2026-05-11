@@ -4,7 +4,7 @@
 批量分析命令
 ===================================
 
-批量分析自选股列表中的所有股票。
+批量分析持仓股列表中的所有股票。
 """
 
 import logging
@@ -39,7 +39,7 @@ class BatchCommand(BotCommand):
     
     @property
     def description(self) -> str:
-        return "批量分析自选股"
+        return "批量分析持仓股"
     
     @property
     def usage(self) -> str:
@@ -61,7 +61,7 @@ class BatchCommand(BotCommand):
         
         if not stock_list:
             return BotResponse.error_response(
-                "自选股列表为空，请先配置 STOCK_LIST"
+                "持仓股列表为空，请先配置 STOCK_LIST"
             )
         
         # 解析数量参数

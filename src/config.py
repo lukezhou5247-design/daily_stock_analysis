@@ -586,7 +586,7 @@ class Config:
     - 类方法 get_instance() 实现单例访问
     """
     
-    # === 自选股配置 ===
+    # === 持仓股配置 ===
     stock_list: List[str] = field(default_factory=list)
 
     # === 飞书云文档配置 ===
@@ -2219,7 +2219,7 @@ class Config:
         if not self.stock_list:
             issues.append(ConfigIssue(
                 severity="error",
-                message="未配置自选股列表 (STOCK_LIST)",
+                message="未配置持仓股列表 (STOCK_LIST)",
                 field="STOCK_LIST",
             ))
         elif self.stock_email_groups:
