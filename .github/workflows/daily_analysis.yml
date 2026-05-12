@@ -352,6 +352,7 @@ jobs:
           # 如果 STOCK_LIST 为空（未设 GitHub Variable），从 .env.example 读取
           if [ -z "$STOCK_LIST" ]; then
             STOCK_LIST=$(grep '^STOCK_LIST=' .env.example | head -1 | sed 's/^STOCK_LIST=//' | sed 's/\s*#.*//' | tr -d ' ')
+            export STOCK_LIST
             echo "📊 从 .env.example 读取持仓股: $STOCK_LIST"
           fi
 
