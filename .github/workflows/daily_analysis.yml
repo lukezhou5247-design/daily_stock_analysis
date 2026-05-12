@@ -55,7 +55,7 @@ jobs:
       - name: 创建必要目录
         run: |
           mkdir -p data logs reports
-      
+
       - name: 执行股票分析
         env:
           # ==========================================
@@ -323,7 +323,7 @@ jobs:
           # ==========================================
           # 持仓股配置
           # ==========================================
-          STOCK_LIST: ${{ vars.STOCK_LIST || secrets.STOCK_LIST || '600519' }}
+          STOCK_LIST: ${{ vars.STOCK_LIST || secrets.STOCK_LIST || '' }}
           MARKET_REVIEW_REGION: ${{ vars.MARKET_REVIEW_REGION || secrets.MARKET_REVIEW_REGION || 'cn' }}
           
           # ==========================================
@@ -349,6 +349,12 @@ jobs:
           REALTIME_SOURCE_PRIORITY: ${{ vars.REALTIME_SOURCE_PRIORITY || 'tencent,akshare_sina,efinance,akshare_em' }}
           
         run: |
+          # 如果 STOCK_LIST 为空（未设 GitHub Variable），从 .env.example 读取
+          if [ -z "$STOCK_LIST" ]; then
+            STOCK_LIST=$(grep '^STOCK_LIST=' .env.example | head -1 | sed 's/^STOCK_LIST=//' | sed 's/\s*#.*//' | tr -d ' ')
+            echo "📊 从 .env.example 读取持仓股: $STOCK_LIST"
+          fi
+
           # 处理 LITELLM YAML 配置文件
           if [ -n "$LITELLM_CONFIG_YAML" ] && [ -n "$LITELLM_CONFIG" ]; then
             echo "📝 使用 GitHub Actions Secrets/Variables 中的 LITELLM_CONFIG_YAML 配置"
