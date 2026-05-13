@@ -35,7 +35,6 @@ def _make_config(**kwargs) -> Config:
         openai_api_keys=[],
         deepseek_api_keys=[],
         bocha_api_keys=[],
-        tavily_api_keys=[],
         brave_api_keys=[],
         serpapi_keys=[],
         searxng_base_urls=[],

@@ -442,7 +442,7 @@ class SearchNewsFreshnessTestCase(unittest.TestCase):
         )
 
     def test_announcements_dimension_uses_news_topic_and_strict_filter(self) -> None:
-        """announcements uses tavily_topic='news' and strict_freshness=True."""
+        """announcements uses news topic and strict_freshness=True."""
         fresh_dt = datetime.now(timezone.utc).replace(microsecond=0)
         fresh_text = fresh_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
         old = (datetime.now().date() - timedelta(days=30)).isoformat()
@@ -472,7 +472,7 @@ class SearchNewsFreshnessTestCase(unittest.TestCase):
         self.assertIn("fresh_announcement", titles)
 
     def test_announcements_etf_is_not_strict(self) -> None:
-        """For ETF, announcements dimension also uses tavily_topic='news' and strict_freshness=True."""
+        """For ETF, announcements dimension also uses news topic and strict_freshness=True."""
         fresh_dt = datetime.now(timezone.utc).replace(microsecond=0)
         fresh_text = fresh_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 

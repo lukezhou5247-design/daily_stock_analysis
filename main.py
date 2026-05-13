@@ -868,7 +868,6 @@ def main() -> int:
             if config.has_search_capability_enabled():
                 search_service = SearchService(
                     bocha_keys=config.bocha_api_keys,
-                    tavily_keys=config.tavily_api_keys,
                     anspire_keys=config.anspire_api_keys,
                     brave_keys=config.brave_api_keys,
                     serpapi_keys=config.serpapi_keys,

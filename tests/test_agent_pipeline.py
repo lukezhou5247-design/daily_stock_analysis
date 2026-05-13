@@ -381,7 +381,6 @@ class TestAgentResultConversion(unittest.TestCase):
             mock_cfg.agent_orchestrator_timeout_s = 0
             mock_cfg.agent_skills = []
             mock_cfg.bocha_api_keys = []
-            mock_cfg.tavily_api_keys = []
             mock_cfg.brave_api_keys = []
             mock_cfg.serpapi_keys = []
             mock_cfg.searxng_base_urls = []
@@ -1134,7 +1133,6 @@ class TestPipelineRouting(unittest.TestCase):
             mock_cfg.agent_max_steps = 5
             mock_cfg.agent_skills = []
             mock_cfg.bocha_api_keys = []
-            mock_cfg.tavily_api_keys = []
             mock_cfg.brave_api_keys = []
             mock_cfg.serpapi_keys = []
             mock_cfg.searxng_base_urls = []
@@ -1180,7 +1178,6 @@ class TestPipelineRouting(unittest.TestCase):
             mock_cfg.agent_max_steps = 10
             mock_cfg.agent_skills = []
             mock_cfg.bocha_api_keys = []
-            mock_cfg.tavily_api_keys = []
             mock_cfg.brave_api_keys = []
             mock_cfg.serpapi_keys = []
             mock_cfg.searxng_base_urls = []
@@ -1233,7 +1230,6 @@ class TestAnalyzeWithAgentStockName(unittest.TestCase):
             mock_cfg.agent_max_steps = 10
             mock_cfg.agent_skills = []
             mock_cfg.bocha_api_keys = []
-            mock_cfg.tavily_api_keys = []
             mock_cfg.brave_api_keys = []
             mock_cfg.serpapi_keys = []
             mock_cfg.searxng_base_urls = []
@@ -1841,7 +1837,6 @@ class TestSafeInt(unittest.TestCase):
             mock_cfg.agent_max_steps = 10
             mock_cfg.agent_skills = []
             mock_cfg.bocha_api_keys = []
-            mock_cfg.tavily_api_keys = []
             mock_cfg.brave_api_keys = []
             mock_cfg.serpapi_keys = []
             mock_cfg.searxng_base_urls = []
@@ -1984,7 +1979,6 @@ class TestSkillActivation(unittest.TestCase):
             mock_cfg.agent_max_steps = 10
             mock_cfg.agent_skills = []
             mock_cfg.bocha_api_keys = []
-            mock_cfg.tavily_api_keys = []
             mock_cfg.brave_api_keys = []
             mock_cfg.serpapi_keys = []
             mock_cfg.searxng_base_urls = []

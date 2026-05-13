@@ -13,7 +13,6 @@ def _make_config() -> SimpleNamespace:
         max_workers=2,
         save_context_snapshot=False,
         bocha_api_keys=[],
-        tavily_api_keys=[],
         brave_api_keys=[],
         serpapi_keys=[],
         minimax_api_keys=[],

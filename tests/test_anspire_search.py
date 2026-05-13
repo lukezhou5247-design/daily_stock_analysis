@@ -397,24 +397,22 @@ class TestAnspireSearchService(unittest.TestCase):
         service = SearchService(
             anspire_keys=["test_key"],
             bocha_keys=[],
-            tavily_keys=[],
             searxng_public_instances_enabled=False,
             news_max_age_days=3,
             news_strategy_profile="short"
         )
-        
+
         self.assertTrue(hasattr(service, '_providers'))
         self.assertGreater(len(service._providers), 0)
-        
+
         first_provider = service._providers[0]
         self.assertIsInstance(first_provider, AnspireSearchProvider)
         self.assertEqual(first_provider.name, "Anspire")
-    
+
     def test_search_service_without_anspire(self):
         """测试未配置 Anspire 时的行为"""
         service = SearchService(
             anspire_keys=[],
-            tavily_keys=["tavily_key"],
             bocha_keys=[],
             searxng_public_instances_enabled=False,
             news_max_age_days=3,
@@ -430,7 +428,6 @@ class TestAnspireSearchService(unittest.TestCase):
         service = SearchService(
             anspire_keys=["anspire_key"],
             bocha_keys=["bocha_key"],
-            tavily_keys=["tavily_key"],
             searxng_public_instances_enabled=False,
             news_max_age_days=3,
             news_strategy_profile="short"
@@ -554,7 +551,6 @@ def run_manual_test():
     service = SearchService(
         anspire_keys=config.anspire_api_keys,
         bocha_keys=config.bocha_api_keys,
-        tavily_keys=config.tavily_keys,
         searxng_public_instances_enabled=False,
         news_max_age_days=3,
         news_strategy_profile="short"

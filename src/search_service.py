@@ -6,7 +6,7 @@ A股自选股智能分析系统 - 搜索服务模块
 
 职责：
 1. 提供统一的新闻搜索接口
-2. 支持 Bocha、Tavily、Brave、SerpAPI、SearXNG 多种搜索引擎
+2. 支持 Bocha、Brave、SerpAPI、SearXNG 多种搜索引擎
 3. 多 Key 负载均衡和故障转移
 4. 搜索结果缓存和格式化
 """
@@ -270,155 +270,6 @@ class BaseSearchProvider(ABC):
             SearchResponse 对象
         """
         return self._execute_search(query, max_results=max_results, days=days)
-
-
-class TavilySearchProvider(BaseSearchProvider):
-    """
-    Tavily 搜索引擎
-    
-    特点：
-    - 专为 AI/LLM 优化的搜索 API
-    - 免费版每月 1000 次请求
-    - 返回结构化的搜索结果
-    
-    文档：https://docs.tavily.com/
-    """
-    
-    def __init__(self, api_keys: List[str]):
-        super().__init__(api_keys, "Tavily")
-    
-    def _do_search(
-        self,
-        query: str,
-        api_key: str,
-        max_results: int,
-        days: int = 7,
-        topic: Optional[str] = None,
-    ) -> SearchResponse:
-        """执行 Tavily 搜索"""
-        try:
-            from tavily import TavilyClient
-        except ImportError:
-            return SearchResponse(
-                query=query,
-                results=[],
-                provider=self.name,
-                success=False,
-                error_message="tavily-python 未安装，请运行: pip install tavily-python"
-            )
-        
-        try:
-            client = TavilyClient(api_key=api_key)
-            
-            # 执行搜索（优化：使用advanced深度、限制最近几天）
-            search_kwargs: Dict[str, Any] = {
-                "query": query,
-                "search_depth": "advanced",  # advanced 获取更多结果
-                "max_results": max_results,
-                "include_answer": False,
-                "include_raw_content": False,
-                "days": days,  # 搜索最近天数的内容
-            }
-            if topic is not None:
-                search_kwargs["topic"] = topic
-
-            response = client.search(
-                **search_kwargs,
-            )
-            
-            # 记录原始响应到日志
-            logger.info(f"[Tavily] 搜索完成，query='{query}', 返回 {len(response.get('results', []))} 条结果")
-            logger.debug(f"[Tavily] 原始响应: {response}")
-            
-            # 解析结果
-            results = []
-            for item in response.get('results', []):
-                results.append(SearchResult(
-                    title=item.get('title', ''),
-                    snippet=item.get('content', '')[:500],  # 截取前500字
-                    url=item.get('url', ''),
-                    source=self._extract_domain(item.get('url', '')),
-                    published_date=item.get('published_date') or item.get('publishedDate'),
-                ))
-            
-            return SearchResponse(
-                query=query,
-                results=results,
-                provider=self.name,
-                success=True,
-            )
-            
-        except Exception as e:
-            error_msg = str(e)
-            # 检查是否是配额问题
-            if 'rate limit' in error_msg.lower() or 'quota' in error_msg.lower():
-                error_msg = f"API 配额已用尽: {error_msg}"
-            
-            return SearchResponse(
-                query=query,
-                results=[],
-                provider=self.name,
-                success=False,
-                error_message=error_msg
-            )
-
-    def search(
-        self,
-        query: str,
-        max_results: int = 5,
-        days: int = 7,
-        topic: Optional[str] = None,
-    ) -> SearchResponse:
-        """执行 Tavily 搜索，可按调用方选择是否启用新闻 topic。"""
-        if topic is None:
-            return super().search(query, max_results=max_results, days=days)
-
-        api_key = self._get_next_key()
-        if not api_key:
-            return SearchResponse(
-                query=query,
-                results=[],
-                provider=self._name,
-                success=False,
-                error_message=f"{self._name} 未配置 API Key"
-            )
-
-        start_time = time.time()
-        try:
-            response = self._do_search(query, api_key, max_results, days=days, topic=topic)
-            response.search_time = time.time() - start_time
-
-            if response.success:
-                self._record_success(api_key)
-                logger.info(f"[{self._name}] 搜索 '{query}' 成功，返回 {len(response.results)} 条结果，耗时 {response.search_time:.2f}s")
-            else:
-                self._record_error(api_key)
-
-            return response
-
-        except Exception as e:
-            self._record_error(api_key)
-            elapsed = time.time() - start_time
-            logger.error(f"[{self._name}] 搜索 '{query}' 失败: {e}")
-            return SearchResponse(
-                query=query,
-                results=[],
-                provider=self._name,
-                success=False,
-                error_message=str(e),
-                search_time=elapsed
-            )
-    
-    @staticmethod
-    def _extract_domain(url: str) -> str:
-        """从 URL 提取域名作为来源"""
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(url)
-            domain = parsed.netloc.replace('www.', '')
-            return domain or '未知来源'
-        except Exception:
-            return '未知来源'
 
 
 class SerpAPISearchProvider(BaseSearchProvider):
@@ -2120,7 +1971,6 @@ class SearchService:
     def __init__(
         self,
         bocha_keys: Optional[List[str]] = None,
-        tavily_keys: Optional[List[str]] = None,
         anspire_keys: Optional[List[str]] = None,
         brave_keys: Optional[List[str]] = None,
         serpapi_keys: Optional[List[str]] = None,
@@ -2135,7 +1985,6 @@ class SearchService:
 
         Args:
             bocha_keys: 博查搜索 API Key 列表
-            tavily_keys: Tavily API Key 列表
             anspire_keys: Anspire Search API Key 列表
             brave_keys: Brave Search API Key 列表
             serpapi_keys: SerpAPI Key 列表
@@ -2168,11 +2017,6 @@ class SearchService:
         if bocha_keys:
             self._providers.append(BochaSearchProvider(bocha_keys))
             logger.info(f"已配置 Bocha 搜索，共 {len(bocha_keys)} 个 API Key")
-
-        # 2. Tavily（免费额度更多，每月 1000 次）
-        if tavily_keys:
-            self._providers.append(TavilySearchProvider(tavily_keys))
-            logger.info(f"已配置 Tavily 搜索，共 {len(tavily_keys)} 个 API Key")
 
         # 3. Brave Search（隐私优先，全球覆盖）
         if brave_keys:
@@ -2802,9 +2646,7 @@ class SearchService:
                     continue
 
                 search_kwargs: Dict[str, Any] = {}
-                if isinstance(provider, TavilySearchProvider):
-                    search_kwargs["topic"] = "news"
-                elif isinstance(provider, BraveSearchProvider):
+                if isinstance(provider, BraveSearchProvider):
                     search_kwargs.update(
                         self._brave_search_locale(
                             stock_code,
@@ -2987,14 +2829,12 @@ class SearchService:
                     'name': 'latest_news',
                     'query': f"{stock_name} {stock_code} latest news events",
                     'desc': '最新消息',
-                    'tavily_topic': 'news',
                     'strict_freshness': True,
                 },
                 {
                     'name': 'market_analysis',
                     'query': f"{stock_name} analyst rating target price report",
                     'desc': '机构分析',
-                    'tavily_topic': None,
                     'strict_freshness': False,
                 },
                 {
@@ -3004,7 +2844,6 @@ class SearchService:
                         if is_index_etf else f"{stock_name} risk insider selling lawsuit litigation"
                     ),
                     'desc': '风险排查',
-                    'tavily_topic': None if is_index_etf else 'news',
                     'strict_freshness': not is_index_etf,
                 },
                 {
@@ -3014,7 +2853,6 @@ class SearchService:
                         if is_index_etf else f"{stock_name} earnings revenue profit growth forecast"
                     ),
                     'desc': '业绩预期',
-                    'tavily_topic': None,
                     'strict_freshness': False,
                 },
                 {
@@ -3024,7 +2862,6 @@ class SearchService:
                         if is_index_etf else f"{stock_name} industry competitors market share outlook"
                     ),
                     'desc': '行业分析',
-                    'tavily_topic': None,
                     'strict_freshness': False,
                 },
             ]
@@ -3034,14 +2871,12 @@ class SearchService:
                     'name': 'latest_news',
                     'query': f"{stock_name} {stock_code} 最新 新闻 重大 事件",
                     'desc': '最新消息',
-                    'tavily_topic': 'news',
                     'strict_freshness': True,
                 },
                 {
                     'name': 'market_analysis',
                     'query': f"{stock_name} 研报 目标价 评级 深度分析",
                     'desc': '机构分析',
-                    'tavily_topic': None,
                     'strict_freshness': False,
                 },
                 {
@@ -3051,7 +2886,6 @@ class SearchService:
                         if is_index_etf else f"{stock_name} 减持 处罚 违规 诉讼 利空 风险"
                     ),
                     'desc': '风险排查',
-                    'tavily_topic': None if is_index_etf else 'news',
                     'strict_freshness': not is_index_etf,
                 },
                 {
@@ -3061,7 +2895,6 @@ class SearchService:
                         if is_index_etf else f"{stock_name} {stock_code} 公司公告 重要公告 上交所 深交所 cninfo"
                     ),
                     'desc': '公司公告',
-                    'tavily_topic': 'news',
                     'strict_freshness': True,
                 },
                 {
@@ -3071,7 +2904,6 @@ class SearchService:
                         if is_index_etf else f"{stock_name} 业绩预告 财报 营收 净利润 同比增长"
                     ),
                     'desc': '业绩预期',
-                    'tavily_topic': None,
                     'strict_freshness': False,
                 },
                 {
@@ -3081,7 +2913,6 @@ class SearchService:
                         if is_index_etf else f"{stock_name} 所在行业 竞争对手 市场份额 行业前景"
                     ),
                     'desc': '行业分析',
-                    'tavily_topic': None,
                     'strict_freshness': False,
                 },
             ]
@@ -3121,19 +2952,11 @@ class SearchService:
             
             logger.info(f"[情报搜索] {dim['desc']}: 使用 {provider.name}")
 
-            if isinstance(provider, TavilySearchProvider) and dim.get('tavily_topic'):
-                response = provider.search(
-                    dim['query'],
-                    max_results=provider_max_results,
-                    days=search_days,
-                    topic=dim['tavily_topic'],
-                )
-            else:
-                response = provider.search(
-                    dim['query'],
-                    max_results=provider_max_results,
-                    days=search_days,
-                )
+            response = provider.search(
+                dim['query'],
+                max_results=provider_max_results,
+                days=search_days,
+            )
             if dim['strict_freshness']:
                 filtered_response = self._filter_news_response(
                     response,
@@ -3437,7 +3260,6 @@ def get_search_service() -> SearchService:
                 
                 _search_service = SearchService(
                     bocha_keys=config.bocha_api_keys,
-                    tavily_keys=config.tavily_api_keys,
                     anspire_keys=config.anspire_api_keys,
                     brave_keys=config.brave_api_keys,
                     serpapi_keys=config.serpapi_keys,
